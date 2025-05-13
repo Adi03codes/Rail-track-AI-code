@@ -1,0 +1,53 @@
+import librosa
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+import joblib
+
+# Step 1: Feature Extraction from Audio Files
+def extract_features(audio_file):
+    y, sr = librosa.load(audio_file, sr=None)  # Load the audio file
+    mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)  # Extract MFCCs
+    mfccs_mean = np.mean(mfccs, axis=1)  # Get mean of MFCCs for each coefficient
+    return mfccs_mean
+
+# Example: Extract features from a set of audio files
+def load_data(audio_files, labels):
+    features = []
+    for file in audio_files:
+        features.append(extract_features(file))
+    return np.array(features), np.array(labels)
+
+# Step 2: Loading and preparing dataset
+# Example file paths (replace with actual file paths)
+audio_files = ["path_to_audio1.wav", "path_to_audio2.wav", "path_to_audio3.wav"]  # Add more file paths
+labels = [0, 1, 0]  # 0 for normal, 1 for defect (this should correspond to your labels)
+
+# Extract features and split into training and test sets
+X, y = load_data(audio_files, labels)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 3: Train a Classifier
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Step 4: Evaluate the model
+y_pred = model.predict(X_test)
+print(classification_report(y_test, y_pred))
+
+# Step 5: Save the model (for future use)
+joblib.dump(model, 'rail_defect_detector_model.pkl')
+
+# Step 6: Real-time Detection (Test with a new sample)
+def predict_defect(audio_file):
+    features = extract_features(audio_file).reshape(1, -1)
+    prediction = model.predict(features)
+    if prediction == 1:
+        print("Defect detected!")
+    else:
+        print("No defect detected.")
+
+# Test with a new audio file
+predict_defect("path_to_new_audio.wav")
