@@ -6,22 +6,20 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import joblib
 
-# Step 1: Feature Extraction from Audio Files
+
 def extract_features(audio_file):
     y, sr = librosa.load(audio_file, sr=None)  # Load the audio file
     mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)  # Extract MFCCs
     mfccs_mean = np.mean(mfccs, axis=1)  # Get mean of MFCCs for each coefficient
     return mfccs_mean
 
-# Example: Extract features from a set of audio files
 def load_data(audio_files, labels):
     features = []
     for file in audio_files:
         features.append(extract_features(file))
     return np.array(features), np.array(labels)
 
-# Step 2: Loading and preparing dataset
-# Example file paths (replace with actual file paths)
+
 audio_files = ["path_to_audio1.wav", "path_to_audio2.wav", "path_to_audio3.wav"]  # Add more file paths
 labels = [0, 1, 0]  # 0 for normal, 1 for defect (this should correspond to your labels)
 
